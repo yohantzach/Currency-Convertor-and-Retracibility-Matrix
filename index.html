@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Currency Converter</title>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet" />
+    <!-- Stylesheet-->
+    <link rel="stylesheet" href="style2.css" />
+</head>
+
+<body>
+    <div class="wrapper">
+        <div class="app-details">
+            <img src="app-icon.svg" class="app-icon" />
+            <h1 class="app-title">Currency Converter</h1>
+            <!-- Adjust the href attribute to reflect the correct path -->
+            <a href="currency.html"><button>Savings and Investments</button></a>
+        </div>
+        <label for="amount">Amount:</label>
+        <input type="number" id="amount" value="300" min="300" max="5000" />
+        <div class="dropdowns">
+            <select id="from-currency-select"></select>
+            <select id="to-currency-select"></select>
+        </div>
+        <button id="convert-button">Convert</button>
+        <p id="result"></p>
+        <p id="fee"></p>
+        <p id="total"></p>
+    </div>
+
+    <!-- Script -->
+    <script>
+        // Paste your generated api Key here
+        let apiKey = "f01efafe83e1941f3449b9c5";
+        let api = `https://v6.exchangerate-api.com/v6/${apiKey}/latest/USD`;
+
+        const fromDropDown = document.getElementById("from-currency-select");
+        const toDropDown = document.getElementById("to-currency-select");
+
+        // Dummy function to simulate currency conversion
+        let convertCurrency = () => {
+            const amount = parseFloat(document.getElementById('amount').value);
+            const fromCurrency = fromDropDown.value;
+            const toCurrency = toDropDown.value;
+
+            // If amount input field is not empty
+            if (amount >= 300 && amount <= 5000) {
+                fetch(api)
+                    .then((resp) => resp.json())
+                    .then((data) => {
+                        let fromExchangeRate = data.conversion_rates[fromCurrency];
+                        let toExchangeRate = data.conversion_rates[toCurrency];
+                        let convertedAmount = (amount / fromExchangeRate) * toExchangeRate;
+
+                        // Calculate fees based on initial currency amount
+                        let feePercentage = 0;
+                        let fee = 0;
+                        if (amount <= 500) {
+                            feePercentage = 3.5;
+                        } else if (amount <= 1500) {
+                            feePercentage = 2.7;
+                        } else if (amount <= 2500) {
+                            feePercentage = 2.0;
+                        } else {
+                            feePercentage = 1.5;
+                        }
+
+                        // Calculate fee
+                        fee = amount * (feePercentage / 100);
+
+                        // Add fee to the initial amount
+                        let totalAmount = amount + fee;
+
+                        // Apply fee to the converted amount
+                        convertedAmount -= fee;
+
+                        // Display result with fee
+                        document.getElementById('result').innerHTML = `${amount} ${fromCurrency} = ${convertedAmount.toFixed(2)} ${toCurrency}`;
+
+                        // Display fee
+                        document.getElementById('fee').innerHTML = `Conversion Fee: ${fee.toFixed(2)} ${fromCurrency}`;
+
+                        // Display total amount (initial amount + fee)
+                        document.getElementById('total').innerHTML = `Total: ${totalAmount.toFixed(2)} ${fromCurrency}`;
+                    });
+            } else {
+                alert("Amount must be between 300 and 5000.");
+            }
+        };
+
+        // Function to populate currency dropdowns
+        let populateCurrencyDropdowns = () => {
+            let currencyCodes = ['USD', 'EUR', 'GBP', 'BRL', 'JPY', 'TRY']; // Sample currency codes
+
+            currencyCodes.forEach((currencyCode) => {
+                let option1 = document.createElement('option');
+                let option2 = document.createElement('option');
+                option1.text = currencyCode;
+                option2.text = currencyCode;
+
+                fromDropDown.add(option1);
+                toDropDown.add(option2);
+            });
+        };
+
+        // Call function to populate currency dropdowns when the page loads
+        populateCurrencyDropdowns();
+
+        // Attach event listener to the convert button
+        document.getElementById('convert-button').addEventListener('click', convertCurrency);
+    </script>
+</body>
+
+
+</html>
